@@ -1,0 +1,11 @@
+flask
+fastapi
+uvicorn
+python-multipart
+requests
+tensorflow-macos
+tensorflow-metal
+numpy<2
+pillow
+opencv-python-headless
+reportlab

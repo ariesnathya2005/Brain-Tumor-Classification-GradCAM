@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NeuroScan AI – Brain Tumor Classification System</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --navy:       #0b1f3a;
+      --navy-mid:   #122b52;
+      --navy-light: #1a3a6b;
+      --accent:     #2563eb;
+      --accent-lt:  #3b82f6;
+      --teal:       #0891b2;
+      --teal-lt:    #22d3ee;
+      --success:    #059669;
+      --warn:       #d97706;
+      --danger:     #dc2626;
+      --bg:         #f0f4f8;
+      --surface:    #ffffff;
+      --border:     #dce4ef;
+      --text:       #1e2d3d;
+      --muted:      #64748b;
+      --light:      #f8fafc;
+      --shadow-sm:  0 1px 3px rgba(11,31,58,.08), 0 1px 2px rgba(11,31,58,.06);
+      --shadow:     0 4px 16px rgba(11,31,58,.10), 0 2px 6px rgba(11,31,58,.07);
+      --shadow-lg:  0 10px 40px rgba(11,31,58,.14), 0 4px 14px rgba(11,31,58,.09);
+      --r:          10px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-light) 100%);
+      color: #fff;
+      padding: 0 2rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,.25);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 66px;
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--teal), var(--accent-lt));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-icon svg { width: 22px; height: 22px; fill: #fff; }
+
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .01em;
+      line-height: 1.2;
+    }
+
+    .brand-text span {
+      font-size: .7rem;
+      color: #93c5fd;
+      font-weight: 400;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    nav { display: flex; gap: 4px; }
+
+    nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: .85rem;
+      font-weight: 500;
+      padding: 6px 16px;
+      border-radius: 6px;
+      transition: all .2s;
+    }
+
+    nav a:hover, nav a.active {
+      color: #fff;
+      background: rgba(255,255,255,.1);
+    }
+
+    .header-badge {
+      background: rgba(8,145,178,.25);
+      border: 1px solid rgba(34,211,238,.3);
+      color: var(--teal-lt);
+      font-size: .7rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    /* ── MAIN LAYOUT ── */
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      background: var(--light);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-header .icon {
+      width: 30px; height: 30px;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .icon-blue   { background: #eff6ff; }
+    .icon-teal   { background: #ecfeff; }
+    .icon-green  { background: #f0fdf4; }
+    .icon-purple { background: #faf5ff; }
+    .icon-amber  { background: #fffbeb; }
+
+    .card-header h2 {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--navy);
+      letter-spacing: .01em;
+    }
+
+    .card-header .sub {
+      font-size: .72rem;
+      color: var(--muted);
+      margin-left: auto;
+      font-weight: 400;
+    }
+
+    .card-body { padding: 20px; }
+
+    /* ── PATIENT INFO ── */
+    .patient-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: .85rem;
+      color: var(--text);
+      background: var(--bg);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+
+    /* ── UPLOAD ── */
+    .upload-zone {
+      border: 2px dashed #bfdbfe;
+      border-radius: 8px;
+      background: #f0f7ff;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      position: relative;
+    }
+
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--accent);
+      background: #dbeafe;
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    }
+
+    .upload-zone .upload-icon {
+      width: 48px; height: 48px;
+      background: #dbeafe;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+    }
+
+    .upload-zone .upload-icon svg { width: 22px; height: 22px; stroke: var(--accent); }
+
+    .upload-zone h3 {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .upload-zone p { font-size: .78rem; color: var(--muted); }
+    .upload-zone .formats {
+      display: inline-flex; gap: 6px; margin-top: 10px;
+    }
+
+    .format-tag {
+      background: #fff;
+      border: 1px solid #bfdbfe;
+      color: var(--accent);
+      font-size: .68rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: .04em;
+    }
+
+    /* ── PREVIEW ── */
+    .preview-box {
+      background: #f8fafc;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .preview-box img {
+      max-width: 100%; max-height: 240px;
+      object-fit: contain;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .preview-box.has-image img { display: block; }
+    .preview-box.has-image .no-image { display: none; }
+
+    .no-image { text-align: center; color: var(--muted); }
+    .no-image svg { width: 40px; height: 40px; stroke: #cbd5e1; margin-bottom: 8px; }
+    .no-image p { font-size: .8rem; }
+
+    .preview-label {
+      font-size: .7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    /* ── ANALYZE BUTTON ── */
+    .analyze-section {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .analyze-section .card {
+      width: 100%;
+    }
+
+    .btn-run {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      cursor: pointer;
+      transition: all .2s;
+      box-shadow: 0 4px 14px rgba(11,31,58,.3);
+    }
+
+    .btn-run:hover {
+      background: linear-gradient(135deg, var(--navy-light) 0%, var(--accent) 100%);
+      box-shadow: 0 6px 20px rgba(37,99,235,.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-run:active { transform: translateY(0); }
+
+    .btn-run:disabled {
+      opacity: .6; cursor: not-allowed; transform: none;
+    }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+
+    .btn-run.loading .spinner { display: block; }
+    .btn-run.loading .btn-text { opacity: .7; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .run-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .run-info {
+      font-size: .8rem;
+      color: var(--muted);
+      flex: 1;
+      text-align: right;
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap {
+      margin-top: 12px;
+      display: none;
+    }
+
+    .progress-wrap.visible { display: block; }
+
+    .progress-bar-bg {
+      background: #e2e8f0;
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--teal-lt));
+      width: 0%;
+      transition: width .3s ease;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: .72rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    /* ── RESULTS ── */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .result-item {
+      background: var(--light);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .result-item .r-label {
+      font-size: .7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .result-item .r-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.2;
+    }
+
+    .result-item .r-sub {
+      font-size: .72rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .tumor-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    .badge-glioma    { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
+    .badge-menin     { background: #fff7ed; color: var(--warn);   border: 1px solid #fed7aa; }
+    .badge-pituitary { background: #fffbeb; color: #b45309;       border: 1px solid #fde68a; }
+    .badge-none      { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
+
+    .confidence-bar-wrap { margin-top: 16px; }
+
+    .conf-label-row {
+      display: flex; justify-content: space-between;
+      font-size: .75rem; font-weight: 600; color: var(--navy);
+      margin-bottom: 6px;
+    }
+
+    .conf-bar-bg {
+      background: #e2e8f0;
+      border-radius: 6px;
+      height: 10px;
+      overflow: hidden;
+    }
+
+    .conf-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      background: linear-gradient(90deg, var(--accent), var(--teal));
+      transition: width 1s cubic-bezier(.4,0,.2,1);
+      width: 0%;
+    }
+
+    .all-classes { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+
+    .class-row { display: flex; align-items: center; gap: 8px; }
+    .class-name { font-size: .75rem; color: var(--muted); width: 80px; flex-shrink: 0; }
+    .class-bar-bg { flex: 1; background: #e2e8f0; border-radius: 4px; height: 6px; overflow: hidden; }
+    .class-bar-fill { height: 100%; border-radius: 4px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+    .class-pct { font-size: .72rem; font-weight: 600; color: var(--text); width: 38px; text-align: right; }
+
+    /* ── GRAD-CAM ── */
+    .gradcam-section { grid-column: 1 / -1; }
+
+    .gradcam-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .gradcam-item {
+      text-align: center;
+    }
+
+    .gradcam-img-wrap {
+      background: #000;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      height: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .gradcam-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      display: none;
+    }
+
+    .gradcam-img-wrap.has-image img { display: block; }
+    .gradcam-img-wrap.has-image .no-img-ph { display: none; }
+
+    .no-img-ph { text-align: center; color: #cbd5e1; padding: 20px; }
+    .no-img-ph svg { width: 36px; height: 36px; stroke: #cbd5e1; display: block; margin: 0 auto 6px; }
+    .no-img-ph span { font-size: .75rem; }
+
+    .gradcam-item h4 {
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 3px;
+    }
+
+    .gradcam-caption {
+      background: #fefce8;
+      border: 1px solid #fef08a;
+      border-radius: 7px;
+      padding: 10px 14px;
+      font-size: .78rem;
+      color: #854d0e;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .gradcam-caption svg { flex-shrink: 0; margin-top: 1px; }
+
+    /* ── DOWNLOAD BTN ── */
+    .btn-download {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 22px;
+      background: #fff;
+      color: var(--navy);
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      margin-top: 16px;
+    }
+
+    .btn-download:hover {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+
+    .btn-download svg { width: 16px; height: 16px; }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--light);
+      border-top: 1px solid var(--border);
+      font-size: .72rem;
+      color: var(--muted);
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      flex-shrink: 0;
+    }
+
+    /* ── PLACEHOLDER STATE ── */
+    .results-placeholder {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--muted);
+    }
+
+    .results-placeholder svg {
+      width: 40px; height: 40px;
+      stroke: #cbd5e1;
+      margin-bottom: 10px;
+    }
+
+    .results-placeholder p { font-size: .82rem; }
+
+    .results-content { display: none; }
+    .results-content.visible { display: block; }
+    .results-placeholder.hidden { display: none; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--navy);
+      color: #94a3b8;
+      margin-top: 2rem;
+    }
+
+    .disclaimer {
+      background: #0f172a;
+      padding: 12px 2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .disclaimer svg { flex-shrink: 0; margin-top: 1px; }
+
+    .disclaimer p {
+      font-size: .75rem;
+      line-height: 1.6;
+      color: #94a3b8;
+    }
+
+    .disclaimer strong { color: #f59e0b; }
+
+    .footer-bottom {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 14px 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-bottom p { font-size: .75rem; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { color: #64748b; text-decoration: none; font-size: .75rem; transition: color .2s; }
+    .footer-links a:hover { color: #94a3b8; }
+
+    /* ── FULL WIDTH CARDS ── */
+    .full-width { grid-column: 1 / -1; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      main { grid-template-columns: 1fr; padding: 1rem; }
+      .gradcam-grid { grid-template-columns: 1fr; }
+      .results-grid { grid-template-columns: 1fr; }
+      .patient-fields { grid-template-columns: 1fr; }
+      .analyze-section, .gradcam-section { grid-column: 1; }
+      nav { display: none; }
+    }
+
+    /* ── ERROR STATE ── */
+    .error-message {
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: .85rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .error-message.visible { display: block; }
+
+    /* ── MODE TOGGLE ── */
+    .mode-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .mode-btn:hover {
+      border-color: var(--accent);
+      background: var(--light);
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* ── BATCH TABLE ── */
+    .batch-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: .8rem;
+    }
+
+    .batch-table thead {
+      background: var(--light);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .batch-table th {
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--navy);
+      letter-spacing: .01em;
+    }
+
+    .batch-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .batch-table tbody tr:hover {
+      background: var(--light);
+    }
+
+    .batch-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .75rem;
+    }
+
+    .batch-status.pending { color: var(--muted); }
+    .batch-status.processing { color: var(--warn); }
+    .batch-status.success { color: var(--success); }
+    .batch-status.error { color: var(--danger); }
+
+    .batch-status-icon {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .batch-status.pending .batch-status-icon { background: var(--muted); }
+    .batch-status.processing .batch-status-icon { background: var(--warn); animation: pulse 1.5s ease-in-out infinite; }
+    .batch-status.success .batch-status-icon { background: var(--success); }
+    .batch-status.error .batch-status-icon { background: var(--danger); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .batch-confidence {
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    /* ── BATCH FILES LIST ── */
+    .batch-files-wrap {
+      display: none;
+    }
+
+    .batch-files-wrap.visible {
+      display: block;
+    }
+
+    .file-list {
+      background: var(--light);
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .8rem;
+    }
+
+    .file-item:last-child {
+      border-bottom: none;
+    }
+
+    .file-item-name {
+      color: var(--text);
+      font-weight: 500;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-item-size {
+      color: var(--muted);
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+
+    .file-item-remove {
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: .75rem;
+      padding: 0 6px;
+      margin-left: 6px;
+    }
+
+    .file-item-remove:hover {
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
+<header>
+  <div class="header-inner">
+    <div class="logo-group">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26C17.81 13.47 19 11.38 19 9c0-3.87-3.13-7-7-7zm0 2c2.76 0 5 2.24 5 5 0 1.86-.97 3.5-2.5 4.4-.3.18-.5.5-.5.84V16h-1v-1.5c0-.28-.22-.5-.5-.5s-.5.22-.5.5V16h-1v-1.76c0-.34-.2-.66-.5-.84C8.97 12.5 8 10.86 8 9c0-2.76 2.24-5 4-5zm-1 8v2h2v-2zm1-5c-.55 0-1 .45-1 1v2.5h2V8c0-.55-.45-1-1-1zm-3 8h6v1H9z"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>NeuroScan AI</h1>
+        <span>Brain Tumor Analysis System</span>
+      </div>
+    </div>
+    <nav>
+      <a href="#" class="active">Home</a>
+      <a href="#analyze">Analyze</a>
+      <a href="#about">About</a>
+    </nav>
+    <div class="header-badge">v2.1.0 · Clinical Preview</div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
+<main id="analyze">
+
+  <!-- ── PATIENT INFO ── -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon icon-blue">
+        <svg width="16" height="16" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <h2>Patient Information</h2>
+      <span class="sub">Optional</span>
+    </div>
+    <div class="card-body">
+      <div class="patient-fields">
+        <div class="field">
+          <label>Patient ID</label>
+          <input type="text" id="patientId" placeholder="e.g. PT-2024-0031"/>
+        </div>
+        <div class="field">
+          <label>Scan Date</label>
+          <input type="date" id="scanDate"/>
+        </div>
+        <div class="field">
+          <label>Patient Name</label>
+          <input type="text" id="patientName" placeholder="Full name (optional)"/>
+        </div>
+        <div class="field">
+          <label>Referring Physician</label>
+          <input type="text" id="physician" placeholder="Dr. (optional)"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── UPLOAD ── -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon icon-teal">
+        <svg width="16" height="16" fill="none" stroke="#0891b2" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <h2>Upload Patient MRI Scan(s)</h2>
+    </div>
+    <div class="card-body">
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="singleModeBtn" onclick="switchMode('single')">Single Image</button>
+        <button class="mode-btn" id="batchModeBtn" onclick="switchMode('batch')">Batch Upload</button>
+      </div>
+
+      <!-- Single upload mode -->
+      <div id="singleMode" class="upload-section">
+        <div class="upload-zone" id="dropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+          <input type="file" id="fileInput" accept=".jpg,.jpeg,.png" onchange="handleFileSelect(event)"/>
+          <div class="upload-icon">
+            <svg fill="none" stroke-width="1.8" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M4 16l4.586-4.586a2 2 0 0 1 2.828 0L16 16m-2-2l1.586-1.586a2 2 0 0 1 2.828 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"/>
+            </svg>
+          </div>
+          <h3>Drag &amp; Drop MRI Image</h3>
+          <p>or click to browse from your computer</p>
+          <div class="formats">
+            <span class="format-tag">JPG</span>
+            <span class="format-tag">JPEG</span>
+            <span class="format-tag">PNG</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Batch upload mode -->
+      <div id="batchMode" class="upload-section" style="display: none;">
+        <div class="upload-zone" id="batchDropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleBatchDrop(event)" style="padding:24px 20px;">
+          <input type="file" id="batchFileInput" accept=".jpg,.jpeg,.png" multiple onchange="handleBatchFileSelect(event)"/>
+          <div class="upload-icon">
+            <svg fill="none" stroke-width="1.8" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M4 16l4.586-4.586a2 2 0 0 1 2.828 0L16 16m-2-2l1.586-1.586a2 2 0 0 1 2.828 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"/>
+            </svg>
+          </div>
+          <h3>Drag &amp; Drop Multiple MRI Images</h3>
+          <p>or click to browse and select multiple files</p>
+          <div class="formats">
+            <span class="format-tag">JPG</span>
+            <span class="format-tag">JPEG</span>
+            <span class="format-tag">PNG</span>
+          </div>
+        </div>
+        <div class="batch-files-wrap" id="batchFilesWrap">
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Selected Files (<span id="batchFileCount">0</span>)</p>
+          <div class="file-list" id="batchFileList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PREVIEW ── -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon icon-purple">
+        <svg width="16" height="16" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </div>
+      <h2>Input Scan Preview</h2>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;align-items:center;">
+      <div class="preview-box" id="previewBox">
+        <img id="previewImg" src="" alt="MRI Preview"/>
+        <div class="no-image">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="M4 16l4.586-4.586a2 2 0 0 1 2.828 0L16 16m-2-2l1.586-1.586a2 2 0 0 1 2.828 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"/>
+          </svg>
+          <p>No image uploaded yet</p>
+        </div>
+      </div>
+      <span class="preview-label" id="previewLabel">Awaiting Upload</span>
+    </div>
+    <div class="status-bar" id="statusBar">
+      <div class="status-dot" id="statusDot" style="background:#94a3b8;"></div>
+      <span id="statusText">No scan loaded</span>
+    </div>
+  </div>
+
+  <!-- ── ANALYZE ── -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon icon-blue">
+        <svg width="16" height="16" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <h2>Analysis Control</h2>
+    </div>
+    <div class="card-body">
+      <div id="errorMessage" class="error-message"></div>
+      <button class="btn-run" id="runBtn" onclick="runAnalysis()">
+        <div class="spinner" id="spinner"></div>
+        <svg id="btnIcon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        <span class="btn-text" id="btnText">Run Analysis</span>
+      </button>
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-label">
+          <span id="progressStep">Initializing model…</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RESULTS ── -->
+  <div class="card full-width">
+    <div class="card-header">
+      <div class="icon icon-green">
+        <svg width="16" height="16" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+        </svg>
+      </div>
+      <h2>Analysis Results</h2>
+      <span class="sub" id="resultTimestamp"></span>
+    </div>
+    <div class="card-body">
+      <div class="results-placeholder" id="resultsPlaceholder">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
+        </svg>
+        <p>Upload an MRI scan and click <strong>Run Analysis</strong> to view results.</p>
+      </div>
+
+      <!-- Single result -->
+      <div class="results-content" id="resultsContent">
+        <div class="results-grid">
+          <div class="result-item">
+            <div class="r-label">Predicted Tumor Type</div>
+            <div class="r-value" id="tumorType">—</div>
+            <div id="tumorBadge"></div>
+            <div class="r-sub" id="tumorDesc">—</div>
+          </div>
+          <div class="result-item">
+            <div class="r-label">Confidence Score</div>
+            <div class="r-value" id="confidenceScore">—</div>
+            <div class="r-sub" id="confidenceSub">—</div>
+          </div>
+          <div class="result-item">
+            <div class="r-label">Tumor Severity</div>
+            <div class="r-value" style="font-size:1rem;"><span id="tumorSeverity">—</span></div>
+            <div class="r-sub" id="severitySub">Clinical Risk Level</div>
+          </div>
+          <div class="result-item">
+            <div class="r-label">Affected Area</div>
+            <div class="r-value" style="font-size:1rem;" id="tumorArea">—</div>
+            <div class="r-sub">Estimated region %</div>
+          </div>
+        </div>
+
+        <div class="confidence-bar-wrap">
+          <div class="conf-label-row">
+            <span>Confidence Distribution</span>
+            <span id="confPctLabel">—</span>
+          </div>
+          <div class="conf-bar-bg">
+            <div class="conf-bar-fill" id="confBarFill"></div>
+          </div>
+        </div>
+
+        <div class="all-classes" id="allClasses"></div>
+
+        <div id="aiWarningPanel" style="display:none; margin-top:16px; padding:12px; background:#fef2f2; border:1px solid #f87171; border-radius:8px; color:#b91c1c; font-size:0.9rem; font-weight:500;">
+        </div>
+
+        <div class="ai-explanation-panel" style="margin-top:20px; margin-bottom:20px; padding:16px; background:#f8fafc; border-left:4px solid #3b82f6; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+          <h4 style="margin:0 0 8px 0; font-size:0.95rem; color:#0f172a; display:flex; align-items:center; gap:6px;">
+            <svg width="18" height="18" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            AI Insight & Explanation
+          </h4>
+          <p id="aiExplanationText" style="margin:0; font-size:0.9rem; color:#334155; line-height:1.5; white-space: pre-wrap;">—</p>
+        </div>
+
+        <div style="margin-top:20px; margin-bottom:20px;">
+          <h4 style="font-size:0.95rem; font-weight:600; color:var(--navy); margin-bottom:8px;">Doctor's Clinical Notes (Optional)</h4>
+          <textarea id="clinicalNotes" rows="3" placeholder="Add your clinical observations or notes here... These will be appended to the PDF report." style="width:100%; border:1px solid #d1d5db; border-radius:6px; padding:10px; font-family:inherit; font-size:0.9rem; resize:vertical;"></textarea>
+        </div>
+
+        <button class="btn-download" onclick="downloadReport()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download Diagnostic Report (PDF)
+        </button>
+      </div>
+
+      <!-- Batch results -->
+      <div class="results-content" id="batchResultsContent">
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <h3 style="font-size:.95rem;font-weight:600;color:var(--navy);">Batch Analysis Results</h3>
+            <span style="font-size:.8rem;color:var(--muted);" id="batchProgressText">Processing...</span>
+          </div>
+          <table class="batch-table">
+            <thead>
+              <tr>
+                <th>File Name</th>
+                <th>Prediction</th>
+                <th>Confidence</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="batchResultsTable">
+            </tbody>
+          </table>
+        </div>
+        <button class="btn-download" onclick="downloadBatchReport()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download Batch Report (CSV)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── GRAD-CAM ── -->
+  <div class="card gradcam-section" id="gradcamSection">
+    <div class="card-header">
+      <div class="icon icon-amber">
+        <svg width="16" height="16" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4m0 4h.01"/>
+        </svg>
+      </div>
+      <h2>Model Attention Visualization (Grad-CAM)</h2>
+    </div>
+    <div class="card-body">
+      <div class="gradcam-grid">
+        <div class="gradcam-item">
+          <div class="gradcam-img-wrap" id="gcOrigWrap">
+            <img id="gcOrigImg" src="" alt="Original MRI"/>
+            <div class="no-img-ph">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path d="M4 16l4.586-4.586a2 2 0 0 1 2.828 0L16 16m-2-2l1.586-1.586a2 2 0 0 1 2.828 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"/>
+              </svg>
+              <span>Original MRI</span>
+            </div>
+          </div>
+          <h4>Original MRI Scan</h4>
+        </div>
+        <div class="gradcam-item">
+          <div class="gradcam-img-wrap" id="gcHeatWrap">
+            <img id="gcHeatImg" src="" alt="Heatmap Overlay"/>
+            <div class="no-img-ph">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path d="M17.657 18.657A8 8 0 0 1 4.343 5.343m0 0A8 8 0 0 1 17.657 5.343m0 13.314A8 8 0 0 1 4.343 5.343"/>
+              </svg>
+              <span>Heatmap Overlay</span>
+            </div>
+          </div>
+          <h4 id="gcOverlayTitle">Grad-CAM Heatmap Overlay</h4>
+          <!-- Toggle modes -->
+          <div style="display:flex; gap:10px; margin-top:8px; justify-content:center;">
+            <button onclick="setOverlayMode('heatmap')" id="btnOverlayHeatmap" style="padding:5px 12px; font-size:0.8rem; border-radius:4px; border:1px solid #3b82f6; background:#eff6ff; color:#1d4ed8; font-weight:600; cursor:pointer;">View Heatmap</button>
+            <button onclick="setOverlayMode('boxes')" id="btnOverlayBoxes" style="padding:5px 12px; font-size:0.8rem; border-radius:4px; border:1px solid #cbd5e1; background:#f8fafc; color:#64748b; font-weight:500; cursor:pointer;">View Highlighted Region</button>
+          </div>
+          <div class="heatmap-legend" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px;">
+            <span style="font-size: 0.7rem; font-weight: 600; color: #64748b;">Low Attention</span>
+            <div style="height: 12px; width: 180px; background: linear-gradient(to right, #00007F, #0000FF, #007FFF, #00FFFF, #7FFF7F, #FFFF00, #FF7F00, #FF0000, #7F0000); border-radius: 6px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);"></div>
+            <span style="font-size: 0.7rem; font-weight: 600; color: #ef4444;">High Attention</span>
+          </div>
+        </div>
+      </div>
+      <div class="gradcam-caption">
+        <svg width="16" height="16" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <p><strong>Note:</strong> Highlighted regions (red/yellow areas) indicate areas of the MRI scan most influencing the model's prediction. This visualization is generated via Gradient-weighted Class Activation Mapping (Grad-CAM) and is intended to aid interpretability only.</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════ FOOTER ═══════════════════════════════ -->
+<footer>
+  <div class="disclaimer">
+    <svg width="16" height="16" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24" style="margin-top:1px;flex-shrink:0;">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+    <p><strong>Medical Disclaimer:</strong> This system is intended for <strong>educational and research purposes only</strong> and does not replace professional medical diagnosis. Results generated by this AI system should not be used as the sole basis for any clinical or diagnostic decision. Always consult a qualified medical professional for clinical interpretation.</p>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2024 NeuroScan AI · Final Year Project · Department of Computer Science &amp; Engineering</p>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Documentation</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════ SCRIPT ═══════════════════════════════ -->
+<script>
+  let uploadedFile = null;
+  let batchFiles = [];
+  let lastPredictionData = null;
+  let batchResults = [];
+  let currentMode = 'single';
+
+  /* ── MODE SWITCHING ── */
+  function switchMode(mode) {
+    currentMode = mode;
+    const singleBtn = document.getElementById('singleModeBtn');
+    const batchBtn = document.getElementById('batchModeBtn');
+    const singleMode = document.getElementById('singleMode');
+    const batchMode = document.getElementById('batchMode');
+    const gradcamSection = document.getElementById('gradcamSection');
+    const previewCard = document.querySelector('.preview-box').parentElement.parentElement;
+
+    if (mode === 'single') {
+      singleBtn.classList.add('active');
+      batchBtn.classList.remove('active');
+      singleMode.style.display = 'block';
+      batchMode.style.display = 'none';
+      gradcamSection.style.display = 'block';
+      previewCard.style.display = 'block';
+      document.getElementById('resultsContent').style.display = 'none';
+      document.getElementById('batchResultsContent').style.display = 'none';
+      document.getElementById('gcHeatImg').src = '';
+      document.getElementById('gcOrigImg').src = '';
+      document.getElementById('gcHeatWrap').classList.remove('has-image');
+      document.getElementById('gcOrigWrap').classList.remove('has-image');
+    } else {
+      singleBtn.classList.remove('active');
+      batchBtn.classList.add('active');
+      singleMode.style.display = 'none';
+      batchMode.style.display = 'block';
+      gradcamSection.style.display = 'none';
+      previewCard.style.display = 'none';
+      document.getElementById('resultsContent').style.display = 'none';
+      document.getElementById('batchResultsContent').style.display = 'none';
+      document.getElementById('gcHeatImg').src = '';
+      document.getElementById('gcOrigImg').src = '';
+      document.getElementById('gcHeatWrap').classList.remove('has-image');
+      document.getElementById('gcOrigWrap').classList.remove('has-image');
+    }
+  }
+
+  /* ── DRAG & DROP ── */
+  function handleDragOver(e) {
+    e.preventDefault();
+    if (currentMode === 'single') {
+      document.getElementById('dropZone').classList.add('dragover');
+    } else {
+      document.getElementById('batchDropZone').classList.add('dragover');
+    }
+  }
+
+  function handleDragLeave(e) {
+    document.getElementById('dropZone').classList.remove('dragover');
+    document.getElementById('batchDropZone').classList.remove('dragover');
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('dropZone').classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+  }
+
+  function handleBatchDrop(e) {
+    e.preventDefault();
+    document.getElementById('batchDropZone').classList.remove('dragover');
+    const files = Array.from(e.dataTransfer.files);
+    files.forEach(file => addBatchFile(file));
+  }
+
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) processFile(file);
+  }
+
+  function handleBatchFileSelect(e) {
+    const files = Array.from(e.target.files);
+    files.forEach(file => addBatchFile(file));
+  }
+
+  function processFile(file) {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!validTypes.includes(file.type)) {
+      showError('Please upload a valid image file (JPG, JPEG, PNG).');
+      return;
+    }
+    uploadedFile = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const src = ev.target.result;
+      const img = document.getElementById('previewImg');
+      img.src = src;
+      document.getElementById('previewBox').classList.add('has-image');
+      document.getElementById('previewLabel').textContent = file.name;
+      const gcOrig = document.getElementById('gcOrigImg');
+      gcOrig.src = src;
+      document.getElementById('gcOrigWrap').classList.add('has-image');
+      document.getElementById('statusDot').style.background = '#059669';
+      document.getElementById('statusText').textContent = `Loaded: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+      clearError();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function addBatchFile(file) {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!validTypes.includes(file.type)) {
+      showError(`${file.name} is not a valid image file. Skipping.`);
+      return;
+    }
+    batchFiles.push(file);
+    updateBatchFileList();
+  }
+
+  function removeBatchFile(index) {
+    batchFiles.splice(index, 1);
+    updateBatchFileList();
+  }
+
+  function updateBatchFileList() {
+    const fileList = document.getElementById('batchFileList');
+    const count = document.getElementById('batchFileCount');
+    const wrap = document.getElementById('batchFilesWrap');
+
+    count.textContent = batchFiles.length;
+
+    if (batchFiles.length === 0) {
+      wrap.classList.remove('visible');
+      fileList.innerHTML = '';
+      return;
+    }
+
+    wrap.classList.add('visible');
+    fileList.innerHTML = batchFiles.map((file, idx) => `
+      <div class="file-item">
+        <span class="file-item-name">${file.name}</span>
+        <span class="file-item-size">${(file.size/1024).toFixed(1)} KB</span>
+        <button class="file-item-remove" onclick="removeBatchFile(${idx})">Remove</button>
+      </div>
+    `).join('');
+  }
+
+  /* ── ERROR HANDLING ── */
+  function showError(message) {
+    const errorEl = document.getElementById('errorMessage');
+    errorEl.textContent = message;
+    errorEl.classList.add('visible');
+  }
+
+  function clearError() {
+    const errorEl = document.getElementById('errorMessage');
+    errorEl.classList.remove('visible');
+  }
+
+  /* ── ANALYSIS ── */
+  const steps = [
+    'Preprocessing image…',
+    'Loading model weights…',
+    'Running forward pass…',
+    'Generating class activations…',
+    'Computing Grad-CAM…',
+    'Compiling results…',
+  ];
+
+  const tumorData = {
+    glioma:       { badge: 'badge-glioma',    desc: 'Malignant glial cell tumor',      color: '#dc2626' },
+    meningioma:   { badge: 'badge-menin',     desc: 'Meningeal membrane tumor',        color: '#d97706' },
+    pituitary:    { badge: 'badge-pituitary', desc: 'Pituitary gland tumor',           color: '#b45309' },
+    notumor:      { badge: 'badge-none',      desc: 'No detectable tumor mass',        color: '#059669' },
+  };
+
+  async function runAnalysis() {
+    if (!uploadedFile) {
+      showError('Please upload an MRI scan first.');
+      return;
+    }
+
+    const btn = document.getElementById('runBtn');
+    const spinner = document.getElementById('spinner');
+    const btnIcon = document.getElementById('btnIcon');
+    const btnText = document.getElementById('btnText');
+    const progressWrap = document.getElementById('progressWrap');
+    const progressFill = document.getElementById('progressFill');
+    const progressStep = document.getElementById('progressStep');
+    const progressPct  = document.getElementById('progressPct');
+
+    btn.disabled = true;
+    btn.classList.add('loading');
+    spinner.style.display = 'block';
+    btnIcon.style.display = 'none';
+    btnText.textContent = 'Analyzing…';
+    progressWrap.classList.add('visible');
+    clearError();
+
+    let step = 0;
+    const totalDuration = 3200;
+    const interval = totalDuration / steps.length;
+
+    const stepTimer = setInterval(() => {
+      if (step < steps.length) {
+        progressStep.textContent = steps[step];
+        const pct = Math.round(((step + 1) / steps.length) * 100);
+        progressFill.style.width = pct + '%';
+        progressPct.textContent = pct + '%';
+        step++;
+      } else {
+        clearInterval(stepTimer);
+      }
+    }, interval);
+
+    const formData = new FormData();
+    formData.append('file', uploadedFile);
+
+    try {
+      const response = await fetch('/api/predict', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Analysis failed');
+      }
+
+      const data = await response.json();
+      lastPredictionData = data;
+
+      setTimeout(() => {
+        showResults(data);
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        spinner.style.display = 'none';
+        btnIcon.style.display = 'block';
+        btnText.textContent = 'Run Analysis';
+        progressWrap.classList.remove('visible');
+        progressFill.style.width = '0%';
+      }, totalDuration + 200);
+
+    } catch (error) {
+      console.error('Error:', error);
+      showError(error.message);
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      spinner.style.display = 'none';
+      btnIcon.style.display = 'block';
+      btnText.textContent = 'Run Analysis';
+      progressWrap.classList.remove('visible');
+      progressFill.style.width = '0%';
+    }
+  }
+
+  async function runBatchAnalysis() {
+    if (batchFiles.length === 0) {
+      showError('Please select at least one image for batch analysis.');
+      return;
+    }
+
+    const btn = document.getElementById('runBtn');
+    btn.disabled = true;
+    btn.classList.add('loading');
+    clearError();
+
+    batchResults = [];
+    document.getElementById('resultsPlaceholder').classList.add('hidden');
+    document.getElementById('batchResultsContent').classList.add('visible');
+
+    for (let i = 0; i < batchFiles.length; i++) {
+      const file = batchFiles[i];
+      updateBatchProgressText(`Processing ${i + 1} of ${batchFiles.length}...`);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/api/predict', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          batchResults.push({
+            filename: file.name,
+            prediction: data.prediction,
+            confidence: data.confidence,
+            status: 'success',
+            data: data
+          });
+        } else {
+          batchResults.push({
+            filename: file.name,
+            prediction: 'Error',
+            confidence: 0,
+            status: 'error',
+            data: null
+          });
+        }
+      } catch (error) {
+        batchResults.push({
+          filename: file.name,
+          prediction: 'Error',
+          confidence: 0,
+          status: 'error',
+          data: null
+        });
+      }
+
+      updateBatchResults();
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    updateBatchProgressText(`Completed ${batchResults.length} analyses`);
+    btn.disabled = false;
+    btn.classList.remove('loading');
+  }
+
+  function updateBatchProgressText(text) {
+    document.getElementById('batchProgressText').textContent = text;
+  }
+
+  function updateBatchResults() {
+    const tbody = document.getElementById('batchResultsTable');
+    tbody.innerHTML = batchResults.map(result => {
+      const conf = (result.confidence * 100).toFixed(1);
+      const pred = capitalizeFirst(result.prediction);
+      const statusClass = result.status === 'success' ? 'success' : 'error';
+      const statusText = result.status === 'success' ? 'Completed' : 'Failed';
+
+      return `
+        <tr>
+          <td style="word-break:break-all;">${result.filename}</td>
+          <td><strong>${pred}</strong></td>
+          <td class="batch-confidence">${conf}%</td>
+          <td><span class="batch-status ${statusClass}"><span class="batch-status-icon"></span>${statusText}</span></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function showResults(data) {
+    if (!data.success) {
+      showError(data.error || 'Failed to get results');
+      return;
+    }
+
+    const predicted = data.prediction.toLowerCase();
+    const confidence = (data.confidence * 100).toFixed(1);
+
+    document.getElementById('tumorType').textContent = capitalizeFirst(predicted);
+    const td = tumorData[predicted] || tumorData['notumor'];
+    document.getElementById('tumorBadge').innerHTML =
+      `<span class="tumor-badge ${td.badge}">${capitalizeFirst(predicted)}</span>`;
+    document.getElementById('tumorDesc').textContent = td.desc;
+    document.getElementById('confidenceScore').textContent = confidence + '%';
+    document.getElementById('confidenceSub').textContent =
+      confidence > 90 ? 'High confidence prediction' : 'Moderate confidence prediction';
+    
+    // Set Severity
+    let sevColor = '#10b981'; // green
+    if (data.severity === 'High Risk') sevColor = '#ef4444'; // red
+    if (data.severity === 'Moderate Risk') sevColor = '#f59e0b'; // orange
+    document.getElementById('tumorSeverity').innerHTML = `<span style="color:${sevColor};font-weight:600;">${data.severity || 'N/A'}</span>`;
+    
+    // Set Area
+    document.getElementById('tumorArea').textContent = data.tumor_area_percentage 
+      ? data.tumor_area_percentage.toFixed(1) + '%' 
+      : '0%';
+      
+    // Set Warning Panel
+    const warningPanel = document.getElementById('aiWarningPanel');
+    if (data.warning) {
+      warningPanel.style.display = 'block';
+      warningPanel.textContent = data.warning;
+    } else {
+      warningPanel.style.display = 'none';
+      warningPanel.textContent = '';
+    }
+    
+    // Set Explanation
+    document.getElementById('aiExplanationText').textContent = data.explanation || 'No explanation available.';
+
+    const now = new Date();
+    document.getElementById('resultTimestamp').textContent =
+      `Completed at ${now.toLocaleTimeString()}`;
+
+    document.getElementById('confPctLabel').textContent = confidence + '%';
+    setTimeout(() => {
+      document.getElementById('confBarFill').style.width = confidence + '%';
+    }, 100);
+
+    const barColors = {
+      glioma:     '#dc2626',
+      meningioma: '#d97706',
+      pituitary:  '#b45309',
+      notumor:    '#059669',
+    };
+
+    const allClassesEl = document.getElementById('allClasses');
+    allClassesEl.innerHTML = '';
+
+    const probs = data.probabilities || {};
+    Object.entries(probs).forEach(([className, prob]) => {
+      const pct = (prob * 100).toFixed(1);
+      const row = document.createElement('div');
+      row.className = 'class-row';
+      row.innerHTML = `
+        <span class="class-name">${capitalizeFirst(className)}</span>
+        <div class="class-bar-bg">
+          <div class="class-bar-fill" style="width:0%;background:${barColors[className.toLowerCase()] || '#94a3b8'};" data-pct="${pct}"></div>
+        </div>
+        <span class="class-pct">${pct}%</span>
+      `;
+      allClassesEl.appendChild(row);
+    });
+
+    setTimeout(() => {
+      document.querySelectorAll('.class-bar-fill').forEach(el => {
+        el.style.width = el.dataset.pct + '%';
+      });
+    }, 200);
+
+    // Display Grad-CAM images
+    if (data.original_image) {
+      document.getElementById('gcOrigImg').src = 'data:image/png;base64,' + data.original_image;
+      document.getElementById('gcOrigWrap').classList.add('has-image');
+    }
+    if (data.gradcam_overlay) {
+      document.getElementById('gcHeatImg').src = 'data:image/png;base64,' + data.gradcam_overlay;
+      document.getElementById('gcHeatWrap').classList.add('has-image');
+    }
+
+    // Show results
+    document.getElementById('resultsPlaceholder').classList.add('hidden');
+    document.getElementById('resultsContent').classList.add('visible');
+    
+    // Auto-select heatmap mode by default
+    setOverlayMode('heatmap');
+  }
+
+  function setOverlayMode(mode) {
+    if (!lastPredictionData) return;
+    
+    const btnHeat = document.getElementById('btnOverlayHeatmap');
+    const btnBoxes = document.getElementById('btnOverlayBoxes');
+    const imgEl = document.getElementById('gcHeatImg');
+    const titleEl = document.getElementById('gcOverlayTitle');
+    
+    if (mode === 'heatmap' && lastPredictionData.gradcam_overlay) {
+      imgEl.src = 'data:image/png;base64,' + lastPredictionData.gradcam_overlay;
+      titleEl.textContent = 'Grad-CAM Heatmap Overlay';
+      
+      btnHeat.style.border = '1px solid #3b82f6';
+      btnHeat.style.background = '#eff6ff';
+      btnHeat.style.color = '#1d4ed8';
+      btnHeat.style.fontWeight = '600';
+      
+      btnBoxes.style.border = '1px solid #cbd5e1';
+      btnBoxes.style.background = '#f8fafc';
+      btnBoxes.style.color = '#64748b';
+      btnBoxes.style.fontWeight = '500';
+    } 
+    else if (mode === 'boxes' && lastPredictionData.boxes_overlay) {
+      imgEl.src = 'data:image/png;base64,' + lastPredictionData.boxes_overlay;
+      titleEl.textContent = 'Highlighted Region';
+      
+      btnBoxes.style.border = '1px solid #3b82f6';
+      btnBoxes.style.background = '#eff6ff';
+      btnBoxes.style.color = '#1d4ed8';
+      btnBoxes.style.fontWeight = '600';
+      
+      btnHeat.style.border = '1px solid #cbd5e1';
+      btnHeat.style.background = '#f8fafc';
+      btnHeat.style.color = '#64748b';
+      btnHeat.style.fontWeight = '500';
+    }
+  }
+
+  function capitalizeFirst(str) {
+    if (!str) return '';
+    if (str === 'notumor') return 'No Tumor';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  function downloadReport() {
+    if (!lastPredictionData) {
+      showError('No analysis results available. Please run analysis first.');
+      return;
+    }
+
+    const payload = {
+        patient_id: document.getElementById('patientId').value || 'PT-10234',
+        name: document.getElementById('patientName').value || 'Arun Kumar',
+        age_gender: '45 / Male', /* Hardcoded to sample for now */
+        predicted: capitalizeFirst(document.getElementById('tumorType').textContent) || 'N/A',
+        confidence: document.getElementById('confidenceScore').textContent.replace('%', '') || '0',
+        severity: document.getElementById('tumorSeverity').innerText.trim() || 'N/A',
+        area: document.getElementById('tumorArea').textContent.replace('%', '') || '0',
+        location: 'Right Hemisphere',
+        original_image_b64: lastPredictionData.original_image || "",
+        gradcam_overlay_b64: lastPredictionData.gradcam_overlay || "",
+        probabilities: lastPredictionData.probabilities || {}
+    };
+
+    const btn = document.querySelector('.btn-download');
+    const oldText = btn.innerHTML;
+    btn.innerHTML = 'Generating PDF... Wait';
+    btn.disabled = true;
+
+    fetch('/api/download_pdf', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to generate PDF');
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `Brain_Tumor_Report_${payload.patient_id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+    })
+    .catch(err => {
+        console.error(err);
+        showError('PDF extraction failed. Pls check backend logs.');
+    })
+    .finally(() => {
+        btn.innerHTML = oldText;
+        btn.disabled = false;
+    });
+  }
+
+  function downloadBatchReport() {
+    if (batchResults.length === 0) {
+      showError('No batch results available.');
+      return;
+    }
+
+    const headers = ['File Name', 'Prediction', 'Confidence (%)', 'Status'];
+    const rows = batchResults.map(r => [
+      `"${r.filename}"`,
+      capitalizeFirst(r.prediction),
+      (r.confidence * 100).toFixed(1),
+      r.status === 'success' ? 'Completed' : 'Failed'
+    ]);
+
+    const csv = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `NeuroScan_Batch_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+  }
+
+  // Set today's date as default
+  document.getElementById('scanDate').valueAsDate = new Date();
+
+  // Override run button for batch mode
+  const originalRunAnalysis = runAnalysis;
+  document.getElementById('runBtn').addEventListener('click', function(e) {
+    if (currentMode === 'batch') {
+      e.preventDefault();
+      runBatchAnalysis();
+    }
+  }, true);
+</script>
+</body>
+</html>
